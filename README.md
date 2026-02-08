@@ -12,3 +12,4 @@ Automated CI/CD pipeline deploying to Google Cloud Run.
 - GitHub Actions
 - Google Cloud Run
 - Python Flask
+
