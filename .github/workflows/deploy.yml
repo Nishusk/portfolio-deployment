@@ -1,0 +1,52 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE_NAME: portfolio-app
+  REGION: us-central1
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Auth
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+    
+    - name: Configure Docker
+      run: gcloud auth configure-docker
+    
+    - name: Build
+      run: |
+        docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
+        docker tag gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA gcr.io/$PROJECT_ID/$SERVICE_NAME:latest
+    
+    - name: Push
+      run: |
+        docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+        docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:latest
+    
+    - name: Deploy
+      run: |
+        gcloud run deploy $SERVICE_NAME \
+          --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+          --platform managed \
+          --region $REGION \
+          --allow-unauthenticated \
+          --memory 512Mi
+    
+    - name: URL
+      run: gcloud run services describe $SERVICE_NAME --region $REGION --format 'value(status.url)'
