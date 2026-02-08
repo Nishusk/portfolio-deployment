@@ -13,3 +13,4 @@ Automated CI/CD pipeline deploying to Google Cloud Run.
 - Google Cloud Run
 - Python Flask
 
+# Ready to deploy!
