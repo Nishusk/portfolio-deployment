@@ -15,3 +15,4 @@ Automated CI/CD pipeline deploying to Google Cloud Run.
 
 # Ready to deploy!
 # Fresh deployment
+# Permissions fixed
